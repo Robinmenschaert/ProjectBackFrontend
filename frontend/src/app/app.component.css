@@ -1,0 +1,4 @@
+app-game-page{
+  display: block;
+  height: calc(100vh - 19px);
+}
