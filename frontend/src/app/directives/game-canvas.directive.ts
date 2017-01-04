@@ -4,55 +4,107 @@ import { Directive, ElementRef } from '@angular/core';
   selector: '[appGameCanvas]'
 })
 export class GameCanvasDirective {
-  keepgoing:boolean = true;
-  canvasWidth:number;
-  canvasHeight:number;
+  canvasSize: Size;
   canvasContext: CanvasRenderingContext2D;
+
+  selfTankSize: Size;
   selfTankImage:any;
-  selfPosition:Position;
+
+  self: Self;
+  isMoving: boolean;
 
   constructor(canvasRef: ElementRef) {
     let canvas = <HTMLCanvasElement> canvasRef.nativeElement;
 
+    this.selfTankSize = new Size();
+    this.selfTankSize.width = 9;
+    this.selfTankSize.height = 10;
     this.selfTankImage = new Image();
     this.selfTankImage.src = "/assets/selfTank.png";
 
     this.canvasContext = canvas.getContext("2d");
-    this.canvasWidth = canvas.width;
-    this.canvasHeight = canvas.height;
+    this.canvasSize = new Size();
+    this.canvasSize.width = canvas.width;
+    this.canvasSize.height = canvas.height;
 
-    this.selfPosition = new Position();
-    this.selfPosition.x = this.canvasWidth/2;
-    this.selfPosition.y = this.canvasHeight/2;
+    this.self = new Self();
+    this.self.position = new Position();
+    this.self.position.x = this.canvasSize.width/2;
+    this.self.position.y = this.canvasSize.height/2;
+    this.self.mousePosition = new Position();
+    this.self.viewAngle = 0.0;
 
-    window.addEventListener("keypress", this.onKeyPress);
+    window.addEventListener("keydown", this.onKeyDown);
+    window.addEventListener("keyup", this.onKeyUp);
+
+    canvas.addEventListener("mousemove", this.onMouseMove);
 
     this.animate();
-
-
   }
 
-  onKeyPress = (event:KeyboardEvent) => {
-    console.log("press");
-    console.log(event.key);
+  onKeyDown = (event: KeyboardEvent) => {
+    if(event.keyCode === 32) {
+      this.isMoving = true;
+    }
+  }
+
+  onKeyUp = (event: KeyboardEvent) => {
+    if(event.keyCode === 32) {
+      this.isMoving = false;
+    }
+  }
+
+  onMouseMove = (event: MouseEvent) => {
+    this.self.mousePosition.x = event.clientX;
+    this.self.mousePosition.y = event.clientY;
+    console.log(event.clientX);
+    console.log(event.clientY);
   }
 
   animate = () => {
-    if(this.keepgoing){
-      requestAnimationFrame(this.animate);
-      this.draw();
+    requestAnimationFrame(this.animate);
+    this.update();
+    this.draw();
+  }
+
+  update = () => {
+    this.calculateSelfPosition();
+  }
+
+  calculateSelfPosition = () => {
+    // Calculate our viewAngle
+    let sX = this.self.position.x - (this.selfTankSize.width/2);
+    let sY = this.self.position.y - (this.selfTankSize.height/2);
+    let mX = this.self.mousePosition.x;
+    let mY = this.self.mousePosition.y;
+    this.self.viewAngle = Math.atan2(mY - sY, mX - sX);
+
+    if(this.isMoving) {
+
+
+      // this.self.position.x += 1;
+      // this.self.position.y += 1;
     }
   }
 
   draw = () => {
-    this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight)
+    this.canvasContext.clearRect(0,0,this.canvasSize.width,this.canvasSize.height);
     this.drawSelf();
     this.drawEnemies();
     this.drawTanks();
     this.drawBullets();
   }
+
+
+
   drawSelf = () => {
-    this.canvasContext.drawImage(this.selfTankImage,this.selfPosition.x,this.selfPosition.y,9,10);
+    this.canvasContext.save();
+    this.canvasContext.translate(this.self.position.x, this.self.position.y);
+    this.canvasContext.rotate(this.self.viewAngle - (Math.PI/2));
+    this.canvasContext.drawImage(this.selfTankImage, -(this.selfTankSize.width/2), -(this.selfTankSize.height/2), this.selfTankSize.width, this.selfTankSize.height);
+    this.canvasContext.restore(); 
+
+    
   }
   drawEnemies = () => {
   }
@@ -62,7 +114,18 @@ export class GameCanvasDirective {
   }
 }
 
-export class Position{
-  x:number;
-  y:number;
+export class Position {
+  x: number;
+  y: number;
+}
+
+export class Size {
+  width: number;
+  height: number;
+}
+
+export class Self {
+  position: Position;
+  viewAngle: number;
+  mousePosition: Position;
 }
