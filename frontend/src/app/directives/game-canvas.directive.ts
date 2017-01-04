@@ -85,12 +85,8 @@ export class GameCanvasDirective {
       // Calculate new position
       const speed = 5;
 
-      this.self.position.x -= Math.cos(this.self.viewAngle) * speed;
-      this.self.position.y -= Math.sin(this.self.viewAngle) * speed;
-
-      console.log("Angle: " + this.self.viewAngle);
-      console.log("X: " + Math.cos(this.self.viewAngle) * speed);
-      console.log("Y: " + Math.sin(this.self.viewAngle) * speed)
+      this.self.position.x += Math.sin(this.self.viewAngle) * speed;
+      this.self.position.y -= Math.cos(this.self.viewAngle) * speed;
     }
   }
 
