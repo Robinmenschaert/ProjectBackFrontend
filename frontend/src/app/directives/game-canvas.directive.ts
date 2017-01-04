@@ -15,12 +15,14 @@ export class GameCanvasDirective {
 
   constructor(canvasRef: ElementRef) {
     let canvas = <HTMLCanvasElement> canvasRef.nativeElement;
+    canvas.width = document.documentElement.clientWidth;
+    canvas.height = document.documentElement.clientHeight;
 
     this.selfTankSize = new Size();
-    this.selfTankSize.width = 9;
-    this.selfTankSize.height = 10;
+    this.selfTankSize.width = 45;
+    this.selfTankSize.height = 50;
     this.selfTankImage = new Image();
-    this.selfTankImage.src = "/assets/selfTank.png";
+    this.selfTankImage.src = "/assets/selfTank2.png";
 
     this.canvasContext = canvas.getContext("2d");
     this.canvasSize = new Size();
@@ -57,8 +59,6 @@ export class GameCanvasDirective {
   onMouseMove = (event: MouseEvent) => {
     this.self.mousePosition.x = event.clientX;
     this.self.mousePosition.y = event.clientY;
-    console.log(event.clientX);
-    console.log(event.clientY);
   }
 
   animate = () => {
@@ -80,8 +80,6 @@ export class GameCanvasDirective {
     this.self.viewAngle = Math.atan2(mY - sY, mX - sX);
 
     if(this.isMoving) {
-
-
       // this.self.position.x += 1;
       // this.self.position.y += 1;
     }
@@ -95,16 +93,12 @@ export class GameCanvasDirective {
     this.drawBullets();
   }
 
-
-
   drawSelf = () => {
     this.canvasContext.save();
     this.canvasContext.translate(this.self.position.x, this.self.position.y);
-    this.canvasContext.rotate(this.self.viewAngle - (Math.PI/2));
+    this.canvasContext.rotate(this.self.viewAngle + (Math.PI/2));
     this.canvasContext.drawImage(this.selfTankImage, -(this.selfTankSize.width/2), -(this.selfTankSize.height/2), this.selfTankSize.width, this.selfTankSize.height);
     this.canvasContext.restore(); 
-
-    
   }
   drawEnemies = () => {
   }
