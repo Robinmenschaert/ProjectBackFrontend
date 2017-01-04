@@ -78,10 +78,19 @@ export class GameCanvasDirective {
     let mX = this.self.mousePosition.x;
     let mY = this.self.mousePosition.y;
     this.self.viewAngle = Math.atan2(mY - sY, mX - sX);
+    // Account for default angle of our tank
+    this.self.viewAngle += (Math.PI/2);
 
     if(this.isMoving) {
-      // this.self.position.x += 1;
-      // this.self.position.y += 1;
+      // Calculate new position
+      const speed = 5;
+
+      this.self.position.x -= Math.cos(this.self.viewAngle) * speed;
+      this.self.position.y -= Math.sin(this.self.viewAngle) * speed;
+
+      console.log("Angle: " + this.self.viewAngle);
+      console.log("X: " + Math.cos(this.self.viewAngle) * speed);
+      console.log("Y: " + Math.sin(this.self.viewAngle) * speed)
     }
   }
 
@@ -96,7 +105,7 @@ export class GameCanvasDirective {
   drawSelf = () => {
     this.canvasContext.save();
     this.canvasContext.translate(this.self.position.x, this.self.position.y);
-    this.canvasContext.rotate(this.self.viewAngle + (Math.PI/2));
+    this.canvasContext.rotate(this.self.viewAngle);
     this.canvasContext.drawImage(this.selfTankImage, -(this.selfTankSize.width/2), -(this.selfTankSize.height/2), this.selfTankSize.width, this.selfTankSize.height);
     this.canvasContext.restore(); 
   }
