@@ -12,7 +12,7 @@ export class GameCanvasDirective {
   canvasSize: Size;
   canvasContext: CanvasRenderingContext2D;
 
-  
+
   selfTankImage:any;
   selfProjectiles: Array<Projectile>;
 
@@ -115,7 +115,7 @@ export class GameCanvasDirective {
 
       this.self.position.x += Math.sin(this.self.viewAngle) * speed;
       this.self.position.y -= Math.cos(this.self.viewAngle) * speed;
-    } 
+    }
   }
 
   calculateSelfProjectilesPosition = () => {
@@ -137,17 +137,17 @@ export class GameCanvasDirective {
 
         let pP = projectile.position;
         let tP = target.position;
-        
-        if (pP.x < tP.x + this.selfTankSize.width 
-            && pP.x + this.projectileRadius > tP.x 
-            && pP.y < tP.y + this.selfTankSize.height 
+
+        if (pP.x < tP.x + this.selfTankSize.width
+            && pP.x + this.projectileRadius > tP.x
+            && pP.y < tP.y + this.selfTankSize.height
             && this.projectileRadius + pP.y > tP.y) {
 
             this.selfProjectiles.splice(projectileIndex, 1);
             this.targets.splice(targetIndex, 1);
             break;
         }
-      } 
+      }
     }
   }
 
@@ -164,7 +164,7 @@ export class GameCanvasDirective {
     this.canvasContext.translate(this.self.position.x, this.self.position.y);
     this.canvasContext.rotate(this.self.viewAngle);
     this.canvasContext.drawImage(this.selfTankImage, -(this.selfTankSize.width/2), -(this.selfTankSize.height/2), this.selfTankSize.width, this.selfTankSize.height);
-    this.canvasContext.restore();  
+    this.canvasContext.restore();
   }
   drawTargets = () => {
     this.canvasContext.save();
@@ -175,13 +175,13 @@ export class GameCanvasDirective {
 
       // debug
       this.canvasContext.strokeRect(target.position.x - 7, target.position.y + 7, 35, 35);
-    }    
-    this.canvasContext.restore();   
+    }
+    this.canvasContext.restore();
   }
   drawTanks = () => {
     this.canvasContext.save();
 
-    this.canvasContext.restore(); 
+    this.canvasContext.restore();
   }
   drawSelfProjectiles = () => {
     for(let projectile of this.selfProjectiles) {
@@ -195,13 +195,13 @@ export class GameCanvasDirective {
       else {
         this.canvasContext.fillStyle = 'green';
       }
-      
+
       this.canvasContext.fill();
       this.canvasContext.lineWidth = 5;
       this.canvasContext.strokeStyle = '#003300';
       this.canvasContext.stroke();
-      this.canvasContext.restore(); 
-    } 
+      this.canvasContext.restore();
+    }
   }
 }
 
@@ -221,7 +221,7 @@ export class Size {
 
   constructor(width?: number, height?: number) {
     this.width = width;
-    this.height = height;   
+    this.height = height;
   }
 }
 
@@ -239,7 +239,7 @@ export class Projectile {
   constructor(initialX?: number, initialY?: number, angle?: number) {
     this.position = new Position(initialX, initialY);
     this.angle = angle;
-  } 
+  }
 }
 
 export class Target {
