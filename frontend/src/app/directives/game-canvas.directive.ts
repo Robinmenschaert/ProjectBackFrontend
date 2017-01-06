@@ -1,7 +1,9 @@
 import { Directive, ElementRef } from '@angular/core';
+import {SocketService} from '../services/socket.service';
 
 @Directive({
-  selector: '[appGameCanvas]'
+  selector: '[appGameCanvas]',
+  providers: [SocketService]
 })
 export class GameCanvasDirective {
   // Constants
@@ -21,7 +23,7 @@ export class GameCanvasDirective {
   self: Self;
   isMoving: boolean;
 
-  constructor(canvasRef: ElementRef) {
+  constructor(private canvasRef: ElementRef, private socketService: SocketService) {
     let canvas = <HTMLCanvasElement> canvasRef.nativeElement;
     canvas.width = document.documentElement.clientWidth;
     canvas.height = document.documentElement.clientHeight;
@@ -64,6 +66,7 @@ export class GameCanvasDirective {
       case 81:
         console.log("q");
         this.selfProjectiles.push(new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle));
+        this.socketService.shoot();
         break;
     }
   }
@@ -74,6 +77,8 @@ export class GameCanvasDirective {
   }
 
   init = () => {
+    /* function aanroeppen */
+    this.socketService.get();
     /* TEMP CALCULATE TARGETS, WILL MOVE TO SERVER EVENTUALLY */
     const targetCount = 5;
     this.targets = new Array<Target>(targetCount);
