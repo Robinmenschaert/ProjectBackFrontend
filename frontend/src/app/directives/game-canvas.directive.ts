@@ -1,5 +1,6 @@
 import { Directive, ElementRef } from '@angular/core';
-import {SocketService} from '../services/socket.service';
+import { SocketService } from '../services/socket.service';
+import { Position,  Size, Self, Projectile, Target} from '../domain/entity';
 
 @Directive({
   selector: '[appGameCanvas]',
@@ -65,8 +66,9 @@ export class GameCanvasDirective {
         break;
       case 81:
         console.log("q");
-        this.selfProjectiles.push(new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle));
-        this.socketService.shoot();
+        let newProjectile = new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle);
+        this.selfProjectiles.push(newProjectile);
+        this.socketService.shoot(newProjectile);
         break;
     }
   }
@@ -80,6 +82,7 @@ export class GameCanvasDirective {
     /* function aanroeppen */
     this.socketService.get();
     /* TEMP CALCULATE TARGETS, WILL MOVE TO SERVER EVENTUALLY */
+    /* op de server zetten */
     const targetCount = 5;
     this.targets = new Array<Target>(targetCount);
     for(let x = 0; x < targetCount; x ++) {
@@ -208,47 +211,4 @@ export class GameCanvasDirective {
       this.canvasContext.restore();
     }
   }
-}
-
-export class Position {
-  x: number;
-  y: number;
-
-  constructor(x?: number, y?: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-export class Size {
-  width: number;
-  height: number;
-
-  constructor(width?: number, height?: number) {
-    this.width = width;
-    this.height = height;
-  }
-}
-
-export class Self {
-  position: Position;
-  viewAngle: number;
-  mousePosition: Position;
-}
-
-export class Projectile {
-  position: Position;
-  angle: number;
-  hasHit: boolean;
-
-  constructor(initialX?: number, initialY?: number, angle?: number) {
-    this.position = new Position(initialX, initialY);
-    this.angle = angle;
-  }
-}
-
-export class Target {
-  position: Position;
-  character: string;
-  isHit: boolean;
 }

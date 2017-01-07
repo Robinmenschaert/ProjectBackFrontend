@@ -14,16 +14,17 @@ export class SocketService {
     let socketUrl = this.host;
     this.socket = io.connect(socketUrl);
     //komt toe op client van de server dus de x y en angel megeven
-    this.socket.on("shoot", () => {console.log("shoot")});
+    this.socket.on("shoot", (projectile: any) => {console.log("projectile info: " + JSON.parse(projectile))});
     this.socket.on("drawEnemy", () => {console.log("drawEnemy")});
   }
 
 
   //stuuren naar de server
-  public shoot(){
+  public shoot(projectile){
     /*let socketUrl = this.host;
     this.socket = io.connect(socketUrl);*/
-    this.socket.emit("shoot");
+    projectile = JSON.stringify(projectile)
+    this.socket.emit("shoot", projectile);
   }
 
   public drawEnemy(){

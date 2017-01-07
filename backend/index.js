@@ -23,8 +23,8 @@ io.on('connection', function (socket) {
     console.log(data);
   });*/
 
-  socket.on('shoot', function () {
-    socket.broadcast.emit("shoot")
+  socket.on('shoot', function (projectile) {
+    socket.broadcast.emit("shoot",projectile)
   })
 
   socket.on('drawEnemy', function () {
