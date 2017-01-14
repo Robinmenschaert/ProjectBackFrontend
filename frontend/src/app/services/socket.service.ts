@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs";
+import { Position,  Size, Self, Projectile, Target, Enemy} from '../domain/entity';
 import * as io from "socket.io-client";
 
 @Injectable()
@@ -10,26 +11,27 @@ export class SocketService {
 
   constructor() { }
 
-  public get(){
+  public connect(){
     let socketUrl = this.host;
     this.socket = io.connect(socketUrl);
-    //komt toe op client van de server dus de x y en angel megeven
-    this.socket.on("shoot", (projectile: any) => {console.log("projectile info: " + JSON.parse(projectile))});
-    this.socket.on("drawEnemy", () => {console.log("drawEnemy")});
   }
 
-
-  //stuuren naar de server
-  public shoot(projectile){
-    /*let socketUrl = this.host;
-    this.socket = io.connect(socketUrl);*/
-    projectile = JSON.stringify(projectile)
-    this.socket.emit("shoot", projectile);
+  public on = (eventName: string, fn: Function) => {
+    this.socket.on(eventName, (data: string, ...args: any[]) => {
+        fn(JSON.parse(data), ...args);
+    });
   }
 
-  public drawEnemy(){
-    /*let socketUrl = this.host;
-    this.socket = io.connect(socketUrl);*/
-    this.socket.emit("drawEnemy");
+  shoot = (projectile: Projectile) =>{
+    this.socket.emit("shoot", JSON.stringify(projectile));
   }
+
+  positionUpdate = (selfAsEnemy: Enemy) => {
+    this.socket.emit("positionUpdate", JSON.stringify(selfAsEnemy));
+  }
+
+  targetHit = (targetId: Number) => {
+    this.socket.emit("targetHit", targetId);
+  }
+
 }

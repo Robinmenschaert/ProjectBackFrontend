@@ -24,6 +24,11 @@ export class Self {
   mousePosition: Position;
 }
 
+export class Enemy {
+  position: Position;
+  viewAngle: number;
+}
+
 export class Projectile {
   position: Position;
   angle: number;
@@ -39,4 +44,5 @@ export class Target {
   position: Position;
   character: string;
   isHit: boolean;
+  id: number;
 }
