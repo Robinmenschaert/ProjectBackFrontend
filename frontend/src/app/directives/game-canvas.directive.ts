@@ -18,6 +18,7 @@ export class GameCanvasDirective {
 
   selfTankImage:any;
   selfProjectiles: Array<Projectile>;
+  enemyProjectiles: Array<Projectile>;
 
   targets: Target[];
 
@@ -32,6 +33,7 @@ export class GameCanvasDirective {
     this.selfTankImage = new Image();
     this.selfTankImage.src = "/assets/selfTank2.png";
     this.selfProjectiles = new Array<Projectile>();
+    this.enemyProjectiles = new Array<Projectile>();
 
     this.canvasContext = canvas.getContext("2d");
     this.canvasSize = new Size();
@@ -207,6 +209,26 @@ export class GameCanvasDirective {
       this.canvasContext.fill();
       this.canvasContext.lineWidth = 5;
       this.canvasContext.strokeStyle = '#003300';
+      this.canvasContext.stroke();
+      this.canvasContext.restore();
+    }
+  }
+  drawEnemyProjectiles = () => {
+    for(let projectile of this.enemyProjectiles) {
+      this.canvasContext.save();
+      this.canvasContext.beginPath();
+      this.canvasContext.arc(projectile.position.x, projectile.position.y, this.projectileRadius, 0, 2 * Math.PI, false);
+
+      if(projectile.hasHit) {
+        this.canvasContext.fillStyle = 'red';
+      }
+      else {
+        this.canvasContext.fillStyle = 'green';
+      }
+
+      this.canvasContext.fill();
+      this.canvasContext.lineWidth = 5;
+      this.canvasContext.strokeStyle = '#330000';
       this.canvasContext.stroke();
       this.canvasContext.restore();
     }

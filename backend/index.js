@@ -24,11 +24,11 @@ io.on('connection', function (socket) {
   });*/
 
   socket.on('shoot', function (projectile) {
-    socket.broadcast.emit("shoot",projectile)
+    socket.broadcast.emit("shoot",projectile);
   })
 
   socket.on('drawEnemy', function () {
-    socket.broadcast.emit("drawEnemy")
+    socket.broadcast.emit("drawEnemy");
   })
 });
 
