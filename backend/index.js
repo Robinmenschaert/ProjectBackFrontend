@@ -1,22 +1,15 @@
-var app = require('http').createServer();
-var io = require('socket.io')(app);
-var fs = require('fs');
-var bodyParser = require('body-parser')
-var express = require('express');
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 
-app.listen(3000);
+server.listen(3000);
 
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use( bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-}));
-app.use(express.json());       // to support JSON-encoded bodies
-app.use(express.urlencoded());
-
-app.post('/register', function(req, res) {
-  console.log("register toegekomen");
+// ========================================================== EXPRESS API ==================================================
+app.post('/register', function(request, response) {
+  console.log(request);
 });
 
+// =========================================================== SOCKET.IO ===================================================
 const targetCount = 5;
 var targets = new Array(targetCount);
 var screenWidth = 958;
