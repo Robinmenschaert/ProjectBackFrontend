@@ -1,0 +1,18 @@
+<p>
+  register-page works!
+</p>
+<form [formGroup]="registerForm" (ngSubmit)="doRegister($event)">
+    <input formControlName="username" type="text" placeholder="Your username">
+    <div *ngIf="((regsterFormSubmitAttempted || registerForm.controls.username.touched || !registerForm.controls.username.pristine) && !registerForm.controls.username.valid)">
+      <p *ngIf="registerForm.controls.username.errors.required">
+        Username is verplicht
+      </p>
+    </div>
+    <input formControlName="password" type="password" placeholder="Your password">
+    <div *ngIf="((regsterFormSubmitAttempted || registerForm.controls.password.touched || !registerForm.controls.password.pristine) && !registerForm.controls.password.valid)">
+      <p *ngIf="registerForm.controls.password.errors.required">
+        Paswoord is verplicht
+      </p>
+    </div>
+  <button type="submit">Register</button>
+</form>

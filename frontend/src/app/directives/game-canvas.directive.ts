@@ -75,7 +75,7 @@ export class GameCanvasDirective {
         this.isMoving = false;
         break;
       case 81:
-        console.log("q");
+      //atm bij q
         let newProjectile = new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle);
         this.selfProjectiles.push(newProjectile);
         this.socketService.shoot(newProjectile);
@@ -96,6 +96,9 @@ export class GameCanvasDirective {
     this.socketService.on("shoot", this.onEnemyShoot);
     this.socketService.on("enemyPositionUpdate", this.onEnemyPositionUpdate);
     this.socketService.on("initTargets", this.onInitTargets);
+    this.socketService.on("newTarget", this.onNewTarget);
+    this.socketService.on("targetHit", this.onTargetHit);
+    this.socketService.on("userDisconnected", this.userDisconnected);
 
 
     this.animate();
@@ -111,6 +114,24 @@ export class GameCanvasDirective {
 
   onInitTargets = (recivedTargets: Target[]) => {
     this.targets = recivedTargets;
+  }
+
+  onNewTarget = (target: Target) => {
+    this.targets.push(target);
+  }
+
+  onTargetHit = (targetId: Number) => {
+    // hitted target uit array verwijderen
+      for(var i = 0; i < this.targets.length; i ++) {
+        if (this.targets[i].id === targetId) {
+          this.targets.splice(i, 1);
+          break;
+        }
+    }
+  }
+
+  userDisconnected = (data: string) => {
+    console.log(data);
   }
 
   animate = () => {
@@ -183,7 +204,7 @@ export class GameCanvasDirective {
 
             this.selfProjectiles.splice(projectileIndex, 1);
             this.targets.splice(targetIndex, 1);
-            this.socketService.targetHit(this.targets[targetIndex].id);
+            this.socketService.targetHit(target.id);
             break;
         }
       }
