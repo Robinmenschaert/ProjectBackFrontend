@@ -13,7 +13,7 @@ export class SocketService {
 
   public connect(){
     let socketUrl = this.host;
-    this.socket = io.connect(socketUrl);
+    this.socket = io.connect(socketUrl, { query: 'token='+ localStorage.getItem('token')});
   }
 
   public on = (eventName: string, fn: Function) => {
@@ -21,17 +21,30 @@ export class SocketService {
         fn(JSON.parse(data), ...args);
     });
   }
+  private emit = (eventName: string, obj: any) => {
+    var request = new JWTRequest(localStorage.getItem('token'),obj)
+    this.socket.emit(eventName, JSON.stringify(request));
+  }
 
-  shoot = (projectile: Projectile) =>{
-    this.socket.emit("shoot", JSON.stringify(projectile));
+  shoot = (projectile: Projectile) => {
+    this.emit("shoot", projectile);
   }
 
   positionUpdate = (selfAsEnemy: Enemy) => {
-    this.socket.emit("positionUpdate", JSON.stringify(selfAsEnemy));
+    this.emit("positionUpdate", selfAsEnemy);
   }
 
   targetHit = (targetId: Number) => {
-    this.socket.emit("targetHit", targetId);
+    this.emit("targetHit", targetId);
   }
+}
 
+export class JWTRequest {
+  JWT: string;
+  data: any;
+
+  constructor(JWT?: string, data?: any) {
+    this.JWT = JWT;
+    this.data = data;
+  }
 }

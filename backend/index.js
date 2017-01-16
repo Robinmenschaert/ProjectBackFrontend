@@ -1,12 +1,66 @@
 var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var bodyParser = require('body-parser');
+
+var mongodb = require('mongodb');
+var mongoose = require('mongoose');
+
+var jwt =  require('jsonwebtoken');
 
 server.listen(3000);
 
 // ========================================================== EXPRESS API ==================================================
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+mongoose.connect('localhost:27017/Project');
+var Schema = mongoose.Schema;
+var UserSchema = new mongoose.Schema({
+  username: { type: String},
+  password: { type: String}
+}, { collection: 'Users' });
+var UserData = mongoose.model('student', UserSchema);
+var tokens = [];
+
 app.post('/register', function(request, response) {
-  console.log(request);
+  console.log(request.body.username);
+  var user = {
+    username: request.body.username,
+    password: request.body.password
+  }
+  var data = new UserData(user);
+  data.save();
+});
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.post('/login', function(request, response) {
+  //console.log(request.body.username);
+  UserData.find({username: request.body.username})
+          .then(function(user){
+            //console.log(user[0].username);
+            //console.log(user.password + " === " + request.body.password);
+            if(user[0].password === request.body.password){
+              console.log('loging in');
+              //login allowed
+              //string(gelijkaardig aan jwt aan maaken)
+              //tokenAanmaken(request.body.username);
+              var token = jwt.sign({ player: request.body.username}, 'robin');
+              tokens.push(token);
+              console.log("ok");
+              response.send(token);
+              //return request.body.username;
+              //in een lijst steken en bij elke socket testen als dit wel mag
+            }else{
+              console.log('not loging in');
+            }
+          });
 });
 
 // =========================================================== SOCKET.IO ===================================================
@@ -44,7 +98,7 @@ io.on('connection', function (socket) {
   socket.on('targetHit', function (targetId) {
     socket.broadcast.emit("targetHit", targetId);
     for(var i = 0; i < targetCount; i ++) {
-      if (targets[i].id === targetId) {
+      if (targets[i].id === JSON.parse(targetId)) {
         targets[i] = calculateNewTarget(i);
         io.sockets.emit("newTarget", JSON.stringify(target));
         break;
@@ -59,7 +113,16 @@ io.on('connection', function (socket) {
 
   socket.emit("initTargets", JSON.stringify(targets));
 });
-
+io.use(function(socket, next){
+  console.log('----------------------------------------------------------------------------');
+  console.log('----------------------------------------------------------------------------');
+  console.log('----------------------------------------------------------------------------');
+  console.log('----------------------------------------------------------------------------');
+  console.log('----------------------------------------------------------------------------');
+  console.log(socket.handshake.query.token);
+  /*if (socket.request.headers.cookie) return next();
+  next(new Error('Authentication error'));*/
+});
 
 //lijst bijhouden alle clients
 //alles opvangen van client en broadcasten behalve sender

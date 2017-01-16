@@ -24,18 +24,16 @@ export class RegisterPageComponent implements OnInit {
       console.log(event);
       console.log(this.registerForm.value);
 
-      var body = 'username=myusername&password=mypassword';
+      var body = 'username='+ this.registerForm.value.username +'&password=' + this.registerForm.value.password;
       var headers = new Headers();
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
 
       this.http
-        .post('localhost:3000/register',
+        .post('http://localhost:3000/register',
           body, {
             headers: headers
           })
-          .subscribe(data => {
-                alert('ok');
-          }, error => {
+          .subscribe(data => {  }, error => {
               console.log(JSON.stringify(error.json()));
           });
 

@@ -1,7 +1,7 @@
 <p>
   login-page works!
 </p>
-<form [formGroup]="loginForm" (ngSubmit)="doRegister($event)">
+<form [formGroup]="loginForm" (ngSubmit)="doLogin($event)">
     <input formControlName="username" type="text" placeholder="Your username">
     <div *ngIf="((loginFormSubmitAttempted || loginForm.controls.username.touched || !loginForm.controls.username.pristine) && !loginForm.controls.username.valid)">
       <p *ngIf="loginForm.controls.username.errors.required">
@@ -14,5 +14,5 @@
         paswoord is verplicht
       </p>
     </div>
-  <button type="submit">Register</button>
+  <button type="submit">Login</button>
 </form>
