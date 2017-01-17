@@ -14,6 +14,7 @@ export class SocketService {
   public connect(){
     let socketUrl = this.host;
     this.socket = io.connect(socketUrl, { query: 'token='+ localStorage.getItem('token')});
+    //this.socket = io.connect(socketUrl);
   }
 
   public on = (eventName: string, fn: Function) => {
@@ -21,21 +22,21 @@ export class SocketService {
         fn(JSON.parse(data), ...args);
     });
   }
-  private emit = (eventName: string, obj: any) => {
+  /*private emit = (eventName: string, obj: any) => {
     var request = new JWTRequest(localStorage.getItem('token'),obj)
     this.socket.emit(eventName, JSON.stringify(request));
-  }
+  }*/
 
   shoot = (projectile: Projectile) => {
-    this.emit("shoot", projectile);
+    this.socket.emit("shoot", JSON.stringify(projectile));
   }
 
   positionUpdate = (selfAsEnemy: Enemy) => {
-    this.emit("positionUpdate", selfAsEnemy);
+    this.socket.emit("positionUpdate", JSON.stringify(selfAsEnemy));
   }
 
   targetHit = (targetId: Number) => {
-    this.emit("targetHit", targetId);
+    this.socket.emit("targetHit", JSON.stringify(targetId));
   }
 }
 

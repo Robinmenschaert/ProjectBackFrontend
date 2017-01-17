@@ -52,6 +52,7 @@ export class GameCanvasDirective {
     this.self.position = new Position(this.canvasSize.width/2, this.canvasSize.height/2);
     this.self.mousePosition = new Position();
     this.self.viewAngle = 0.0;
+    this.self.score = 0;
 
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
@@ -74,13 +75,59 @@ export class GameCanvasDirective {
       case 32:
         this.isMoving = false;
         break;
+      case 65:
+        this.createProjectile("A");
+        break;
+      case 90:
+        this.createProjectile("Z");
+        break;
+      case 69:
+        this.createProjectile("E");
+        break;
+      case 82:
+        this.createProjectile("R");
+        break;
+      case 84:
+        this.createProjectile("T");
+        break;
       case 81:
-      //atm bij q
-        let newProjectile = new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle);
-        this.selfProjectiles.push(newProjectile);
-        this.socketService.shoot(newProjectile);
+        this.createProjectile("Q");
+        break;
+      case 83:
+        this.createProjectile("S");
+        break;
+      case 68:
+        this.createProjectile("D");
+        break;
+      case 70:
+        this.createProjectile("F");
+        break;
+      case 71:
+        this.createProjectile("G");
+        break;
+      case 87:
+        this.createProjectile("W");
+        break;
+      case 88:
+        this.createProjectile("X");
+        break;
+      case 67:
+        this.createProjectile("C");
+        break;
+      case 86:
+        this.createProjectile("V");
+        break;
+      case 66:
+        this.createProjectile("B");
         break;
     }
+  }
+
+  createProjectile = (letter: string) => {
+    let newProjectile = new Projectile(this.self.position.x, this.self.position.y, this.self.viewAngle);
+    newProjectile.character = letter;
+    this.selfProjectiles.push(newProjectile);
+    this.socketService.shoot(newProjectile);
   }
 
   onMouseMove = (event: MouseEvent) => {
@@ -130,8 +177,9 @@ export class GameCanvasDirective {
     }
   }
 
-  userDisconnected = (data: string) => {
+  userDisconnected = (data: string, iets: any) => {
     console.log(data);
+    delete this.enemies[iets];
   }
 
   animate = () => {
@@ -166,7 +214,8 @@ export class GameCanvasDirective {
     }
     let enemy = <Enemy>{
       position: new Position(this.self.position.x, this.self.position.y),
-      viewAngle: this.self.viewAngle
+      viewAngle: this.self.viewAngle,
+      score: this.self.score
     };
     this.socketService.positionUpdate(enemy);
   }
@@ -200,7 +249,10 @@ export class GameCanvasDirective {
         if (pP.x < tP.x + this.tankSize.width
             && pP.x + this.projectileRadius > tP.x
             && pP.y < tP.y + this.tankSize.height
-            && this.projectileRadius + pP.y > tP.y) {
+            && this.projectileRadius + pP.y > tP.y
+            && projectile.character === target.character) {
+
+            this.self.score ++;
 
             this.selfProjectiles.splice(projectileIndex, 1);
             this.targets.splice(targetIndex, 1);
@@ -219,6 +271,8 @@ export class GameCanvasDirective {
     this.drawTanks();
     this.drawSelfProjectiles();
     this.drawEnemyProjectiles();
+    this.drawSelfScore();
+    this.drawEnemyScore();
   }
 
   drawSelf = () => {
@@ -229,6 +283,12 @@ export class GameCanvasDirective {
     this.canvasContext.restore();
   }
 
+  drawSelfScore = () => {
+    this.canvasContext.save();
+    this.canvasContext.fillText("score = " +  this.self.score, this.self.position.x -(this.tankSize.width/2)  , this.self.position.y + (this.tankSize.height/2) +  20 );
+    this.canvasContext.restore();
+  }
+
   drawEnemies = () => {
     for(let key in this.enemies){
       let enemy = this.enemies[key];
@@ -236,6 +296,16 @@ export class GameCanvasDirective {
       this.canvasContext.translate(enemy.position.x, enemy.position.y);
       this.canvasContext.rotate(enemy.viewAngle);
       this.canvasContext.drawImage(this.enemyTankImage, -(this.tankSize.width/2), -(this.tankSize.height/2), this.tankSize.width, this.tankSize.height);
+
+      this.canvasContext.restore();
+    }
+  }
+
+  drawEnemyScore = () => {
+    for(let key in this.enemies){
+      let enemy = this.enemies[key];
+      this.canvasContext.save();
+      this.canvasContext.fillText("score = " +  enemy.score, enemy.position.x -(this.tankSize.width/2)  , enemy.position.y + (this.tankSize.height/2) +  20 );
       this.canvasContext.restore();
     }
   }
@@ -261,7 +331,8 @@ export class GameCanvasDirective {
     for(let projectile of this.selfProjectiles) {
       this.canvasContext.save();
       this.canvasContext.beginPath();
-      this.canvasContext.arc(projectile.position.x, projectile.position.y, this.projectileRadius, 0, 2 * Math.PI, false);
+      this.canvasContext.font = "25px serif";
+      this.canvasContext.fillText(projectile.character, projectile.position.x, projectile.position.y);
 
       if(projectile.hasHit) {
         this.canvasContext.fillStyle = 'red';
@@ -281,7 +352,8 @@ export class GameCanvasDirective {
     for(let projectile of this.enemyProjectiles) {
       this.canvasContext.save();
       this.canvasContext.beginPath();
-      this.canvasContext.arc(projectile.position.x, projectile.position.y, this.projectileRadius, 0, 2 * Math.PI, false);
+      this.canvasContext.font = "25px serif";
+      this.canvasContext.fillText(projectile.character, projectile.position.x, projectile.position.y);
 
       if(projectile.hasHit) {
         this.canvasContext.fillStyle = 'red';

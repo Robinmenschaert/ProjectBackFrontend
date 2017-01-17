@@ -43,24 +43,24 @@ app.use(function(req, res, next) {
 app.post('/login', function(request, response) {
   //console.log(request.body.username);
   UserData.find({username: request.body.username})
-          .then(function(user){
-            //console.log(user[0].username);
-            //console.log(user.password + " === " + request.body.password);
-            if(user[0].password === request.body.password){
-              console.log('loging in');
-              //login allowed
-              //string(gelijkaardig aan jwt aan maaken)
-              //tokenAanmaken(request.body.username);
-              var token = jwt.sign({ player: request.body.username}, 'robin');
-              tokens.push(token);
-              console.log("ok");
-              response.send(token);
-              //return request.body.username;
-              //in een lijst steken en bij elke socket testen als dit wel mag
-            }else{
-              console.log('not loging in');
-            }
-          });
+    .then(function(user){
+      //console.log(user[0].username);
+      //console.log(user.password + " === " + request.body.password);
+      if(user[0].password === request.body.password){
+        console.log('loging in');
+        //login allowed
+        //string(gelijkaardig aan jwt aan maaken)
+        //tokenAanmaken(request.body.username);
+        var token = jwt.sign({ player: request.body.username}, 'robin');
+        tokens.push(token);
+        console.log("ok");
+        response.send(token);
+        //return request.body.username;
+        //in een lijst steken en bij elke socket testen als dit wel mag
+      }else{
+        console.log('not loging in');
+      }
+    });
 });
 
 // =========================================================== SOCKET.IO ===================================================
@@ -85,6 +85,7 @@ function calculateNewTarget() {
   return target;
 }
 io.on('connection', function (socket) {
+  console.log("connected");
 
   socket.on('shoot', function (projectile) {
     socket.broadcast.emit("shoot",projectile);
@@ -108,21 +109,25 @@ io.on('connection', function (socket) {
 
   socket.on('disconnect', function() {
       console.log('Got disconnect!');
-      socket.broadcast.emit("userDisconnected", JSON.stringify("disconect"));
+      socket.broadcast.emit("userDisconnected", JSON.stringify("disconect"), socket.id);
    });
-
   socket.emit("initTargets", JSON.stringify(targets));
 });
-io.use(function(socket, next){
-  console.log('----------------------------------------------------------------------------');
-  console.log('----------------------------------------------------------------------------');
-  console.log('----------------------------------------------------------------------------');
-  console.log('----------------------------------------------------------------------------');
-  console.log('----------------------------------------------------------------------------');
-  console.log(socket.handshake.query.token);
-  /*if (socket.request.headers.cookie) return next();
-  next(new Error('Authentication error'));*/
+
+ /*io.use(function(socket, next){
+  //console.log(socket.handshake.query.token);
+  checkPermition(socket.handshake.query.token);
 });
+
+function checkPermition(token) {
+  for (var i = 0; i < tokens.length; i++) {
+    if(tokens[i] === token){
+      console.log("allowed");
+    }else{
+      //terug zenden naar login
+    }
+  }
+}*/
 
 //lijst bijhouden alle clients
 //alles opvangen van client en broadcasten behalve sender
