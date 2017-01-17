@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 export class LoginPageComponent {
 
   public loginFormSubmitAttempted: boolean = false;
+  public responseCode: number = 0;
 
   public loginForm = this.fb.group({
     username: ["", Validators.required],
@@ -28,8 +29,6 @@ export class LoginPageComponent {
   doLogin = (event) => {
     this.loginFormSubmitAttempted = true;
     if (this.loginForm.valid) {
-      //console.log(event);
-      //console.log(this.loginForm.value);
       var body = 'username='+ this.loginForm.value.username +'&password=' + this.loginForm.value.password;
       var headers = new Headers();
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -37,14 +36,36 @@ export class LoginPageComponent {
       this.http
         .post('http://localhost:3000/login', body, { headers: headers })
         .subscribe((data: Response) => {
-          console.log(data.text());
-          // token opslaan in de angular 2 lokal staroge
-          localStorage.setItem('token', data.text());
-          this.router.navigate(['game']);
+          if (data.json().code === 400) {
+            //bad request logingegevens niet corect
+            this.responseCode = data.json().code;
+          }
+          if (data.json().code === 200) {
+            //inloggen gelukt
+            localStorage.setItem('token', data.json().token);
+            this.router.navigate(['game']);
+          }
         }, error => {
             console.log(JSON.stringify(error.json()));
         });
     }
   }
+  doGuestLogin = () => {
+    var body = 'username=guest';
+    var headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
 
+    this.http
+      .post('http://localhost:3000/guestLogin', body, { headers: headers })
+      .subscribe((data: Response) => {
+        if (data.json().code === 200) {
+          //inloggen gelukt
+          localStorage.setItem('token', data.json().token);
+          this.router.navigate(['game']);
+        }
+      }
+      , error => {
+          console.log(JSON.stringify(error.json()));
+      });
+  }
 }

@@ -24,43 +24,59 @@ var UserSchema = new mongoose.Schema({
 var UserData = mongoose.model('student', UserSchema);
 var tokens = [];
 
-app.post('/register', function(request, response) {
-  console.log(request.body.username);
-  var user = {
-    username: request.body.username,
-    password: request.body.password
-  }
-  var data = new UserData(user);
-  data.save();
-});
-
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
+app.post('/register', function(request, response) {
+  console.log("username: " + request.body.username);
+  UserData.find()
+    .then(function(users){
+      for (var i = 0; i < users.length; i++) {
+        if (users[i].username === request.body.username) {
+          //console.log("username is het zelfde");
+          response.send({"code": 401});
+        }else if (request.body.username === null || request.body.password === null || request.body.username === "" || request.body.password === "") {
+          //console.log("leeg");
+          response.send({"code": 400});
+        }else {
+          var user = {
+            username: request.body.username,
+            password: request.body.password
+          }
+          var data = new UserData(user);
+          data.save();
+          response.send({"code": 200});
+        }
+      }
+    });
+  /**/
+});
+
 app.post('/login', function(request, response) {
   //console.log(request.body.username);
   UserData.find({username: request.body.username})
     .then(function(user){
-      //console.log(user[0].username);
-      //console.log(user.password + " === " + request.body.password);
       if(user[0].password === request.body.password){
         console.log('loging in');
-        //login allowed
-        //string(gelijkaardig aan jwt aan maaken)
-        //tokenAanmaken(request.body.username);
         var token = jwt.sign({ player: request.body.username}, 'robin');
         tokens.push(token);
         console.log("ok");
-        response.send(token);
-        //return request.body.username;
-        //in een lijst steken en bij elke socket testen als dit wel mag
+        response.send({'token': token,"code": 200});
       }else{
         console.log('not loging in');
+        response.send({"code": 400});
       }
     });
+});
+
+app.post('/guestLogin', function(request, response) {
+  //console.log(request.body.username);
+  var token = jwt.sign({ player: request.body.username}, 'robin');
+  tokens.push(token);
+  response.send({'token': token,"code": 200});
 });
 
 // =========================================================== SOCKET.IO ===================================================

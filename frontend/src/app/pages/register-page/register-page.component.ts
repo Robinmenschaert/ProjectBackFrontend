@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-
-import { Http, Headers } from '@angular/http';
+import { Router } from '@angular/router';
+import { Http, Headers, Response } from '@angular/http';
 
 @Component({
   selector: 'app-register-page',
@@ -10,13 +10,14 @@ import { Http, Headers } from '@angular/http';
 })
 export class RegisterPageComponent implements OnInit {
   public regsterFormSubmitAttempted: boolean = false;
+  public responseCode: number = 0;
 
   public registerForm = this.fb.group({
     username: ["", Validators.required],
     password: ["", Validators.required]
   });
 
-  constructor(public fb: FormBuilder, private http:Http) {}
+  constructor(public fb: FormBuilder, private http:Http, private router: Router) {}
 
   doRegister(event) {
     this.regsterFormSubmitAttempted = true;
@@ -33,7 +34,16 @@ export class RegisterPageComponent implements OnInit {
           body, {
             headers: headers
           })
-          .subscribe(data => {  }, error => {
+          .subscribe((data: Response) => {
+            console.log(data.json())
+            if (data.json().code === 400 || 401) {
+              this.responseCode = data.json();
+            }
+            if (data.json() === 200) {
+              //gelukt redirect naar login
+              this.router.navigate(['']);
+            }
+          }, error => {
               console.log(JSON.stringify(error.json()));
           });
 

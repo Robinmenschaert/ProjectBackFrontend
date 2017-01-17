@@ -14,5 +14,8 @@
         Paswoord is verplicht
       </p>
     </div>
+    <p *ngIf="(responseCode === 401)">
+      user name alredy exists pleas pick an other one
+    </p>
   <button type="submit">Register</button>
 </form>
