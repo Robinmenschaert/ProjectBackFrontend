@@ -31,7 +31,6 @@ app.use(function(req, res, next) {
 });
 
 app.post('/register', function(request, response) {
-  console.log("username: " + request.body.username);
   UserData.find()
     .then(function(users){
       for (var i = 0; i < users.length; i++) {
@@ -56,25 +55,24 @@ app.post('/register', function(request, response) {
 });
 
 app.post('/login', function(request, response) {
-  //console.log(request.body.username);
   UserData.find({username: request.body.username})
     .then(function(user){
       if(user[0].password === request.body.password){
-        console.log('loging in');
-        var token = jwt.sign({ player: request.body.username}, 'robin');
+        var date = new Date().getTime();
+        var exspirationDate = date + (24 * 3600);
+        var token = jwt.sign({ player: request.body.username, exp: date}, 'robin');
         tokens.push(token);
-        console.log("ok");
         response.send({'token': token,"code": 200});
       }else{
-        console.log('not loging in');
         response.send({"code": 400});
       }
     });
 });
 
 app.post('/guestLogin', function(request, response) {
-  //console.log(request.body.username);
-  var token = jwt.sign({ player: request.body.username}, 'robin');
+  var date = new Date().getTime();
+  var exspirationDate = date + (3600);
+  var token = jwt.sign({ player: request.body.username, exp: exspirationDate}, 'robin');
   tokens.push(token);
   response.send({'token': token,"code": 200});
 });
@@ -101,8 +99,6 @@ function calculateNewTarget() {
   return target;
 }
 io.on('connection', function (socket) {
-  console.log("connected");
-
   socket.on('shoot', function (projectile) {
     socket.broadcast.emit("shoot",projectile);
   });
@@ -124,29 +120,28 @@ io.on('connection', function (socket) {
   });
 
   socket.on('disconnect', function() {
-      console.log('Got disconnect!');
       socket.broadcast.emit("userDisconnected", JSON.stringify("disconect"), socket.id);
    });
   socket.emit("initTargets", JSON.stringify(targets));
 });
 
- /*io.use(function(socket, next){
-  //console.log(socket.handshake.query.token);
-  checkPermition(socket.handshake.query.token);
-});
-
-function checkPermition(token) {
-  for (var i = 0; i < tokens.length; i++) {
-    if(tokens[i] === token){
-      console.log("allowed");
-    }else{
-      //terug zenden naar login
+ io.use(function(socket, next){
+  var token = socket.handshake.query.token;
+  if (typeof tokens !== 'undefined' && tokens.length > 0) {
+    for (var i = 0; i < tokens.length; i++) {
+      if(tokens[i] === token){
+        var decoded = jwt.verify(token, 'robin');
+        var date = new Date().getTime();
+        if (decoded.exp > date) {
+        }else {
+          socket.emit("redirect", JSON.stringify("redirect"));
+        }
+      }else{
+        socket.emit("redirect", JSON.stringify("redirect"));
+      }
     }
+  }else {
+    socket.emit("redirect", JSON.stringify("redirect"));
   }
-}*/
-
-//lijst bijhouden alle clients
-//alles opvangen van client en broadcasten behalve sender
-//target berekenen en broadcasten naar iedereen (per hit event nieuw makken)
-//hit verificatie
-//(optioneel) kamers
+  next();
+});

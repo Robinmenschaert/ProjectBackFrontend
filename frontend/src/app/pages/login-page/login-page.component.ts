@@ -22,9 +22,7 @@ export class LoginPageComponent {
     this.init();
   }
 
-  init = () => {
-
-  }
+  init = () => {  }
 
   doLogin = (event) => {
     this.loginFormSubmitAttempted = true;
@@ -37,11 +35,9 @@ export class LoginPageComponent {
         .post('http://localhost:3000/login', body, { headers: headers })
         .subscribe((data: Response) => {
           if (data.json().code === 400) {
-            //bad request logingegevens niet corect
             this.responseCode = data.json().code;
           }
           if (data.json().code === 200) {
-            //inloggen gelukt
             localStorage.setItem('token', data.json().token);
             this.router.navigate(['game']);
           }
@@ -59,7 +55,6 @@ export class LoginPageComponent {
       .post('http://localhost:3000/guestLogin', body, { headers: headers })
       .subscribe((data: Response) => {
         if (data.json().code === 200) {
-          //inloggen gelukt
           localStorage.setItem('token', data.json().token);
           this.router.navigate(['game']);
         }

@@ -22,9 +22,6 @@ export class RegisterPageComponent implements OnInit {
   doRegister(event) {
     this.regsterFormSubmitAttempted = true;
     if (this.registerForm.valid) {
-      console.log(event);
-      console.log(this.registerForm.value);
-
       var body = 'username='+ this.registerForm.value.username +'&password=' + this.registerForm.value.password;
       var headers = new Headers();
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -35,7 +32,6 @@ export class RegisterPageComponent implements OnInit {
             headers: headers
           })
           .subscribe((data: Response) => {
-            console.log(data.json())
             if (data.json().code === 400 || 401) {
               this.responseCode = data.json();
             }

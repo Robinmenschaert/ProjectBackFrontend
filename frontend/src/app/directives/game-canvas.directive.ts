@@ -1,17 +1,16 @@
 import { Directive, ElementRef } from '@angular/core';
 import { SocketService } from '../services/socket.service';
 import { Position,  Size, Self, Projectile, Target, Enemy} from '../domain/entity';
+import { Router } from '@angular/router';
 
 @Directive({
   selector: '[appGameCanvas]',
   providers: [SocketService]
 })
 export class GameCanvasDirective {
-  // Constants
   projectileRadius: number = 5;
   tankSize: Size = new Size(45, 50);
 
-  //
   canvasSize: Size;
   canvasContext: CanvasRenderingContext2D;
 
@@ -27,7 +26,7 @@ export class GameCanvasDirective {
   enemies: { [id: string]: Enemy };
   isMoving: boolean;
 
-  constructor(private canvasRef: ElementRef, private socketService: SocketService) {
+  constructor(private canvasRef: ElementRef, private socketService: SocketService, private router: Router) {
     let canvas = <HTMLCanvasElement> canvasRef.nativeElement;
     canvas.width = document.documentElement.clientWidth;
     canvas.height = document.documentElement.clientHeight;
@@ -136,19 +135,21 @@ export class GameCanvasDirective {
   }
 
   init = () => {
-    /* function aanroeppen */
     this.socketService.connect();
-    /* TEMP CALCULATE TARGETS, WILL MOVE TO SERVER EVENTUALLY */
-    /* op de server zetten */
     this.socketService.on("shoot", this.onEnemyShoot);
     this.socketService.on("enemyPositionUpdate", this.onEnemyPositionUpdate);
     this.socketService.on("initTargets", this.onInitTargets);
     this.socketService.on("newTarget", this.onNewTarget);
     this.socketService.on("targetHit", this.onTargetHit);
-    this.socketService.on("userDisconnected", this.userDisconnected);
+    this.socketService.on("userDisconnected", this.onUserDisconnected);
+    this.socketService.on("redirect", this.onRedirect);
 
 
     this.animate();
+  }
+
+  onRedirect = () => {
+    this.router.navigate(['/']);
   }
 
   onEnemyShoot = (recivedProjectile: Projectile) => {
@@ -168,7 +169,6 @@ export class GameCanvasDirective {
   }
 
   onTargetHit = (targetId: Number) => {
-    // hitted target uit array verwijderen
       for(var i = 0; i < this.targets.length; i ++) {
         if (this.targets[i].id === targetId) {
           this.targets.splice(i, 1);
@@ -177,7 +177,7 @@ export class GameCanvasDirective {
     }
   }
 
-  userDisconnected = (data: string, iets: any) => {
+  onUserDisconnected = (data: string, iets: any) => {
     console.log(data);
     delete this.enemies[iets];
   }
@@ -196,17 +196,14 @@ export class GameCanvasDirective {
   }
 
   calculateSelfPosition = () => {
-    // Calculate our viewAngle
     let sX = this.self.position.x - (this.tankSize.width/2);
     let sY = this.self.position.y - (this.tankSize.height/2);
     let mX = this.self.mousePosition.x;
     let mY = this.self.mousePosition.y;
     this.self.viewAngle = Math.atan2(mY - sY, mX - sX);
-    // Account for default angle of our tank
     this.self.viewAngle += (Math.PI/2);
 
     if(this.isMoving) {
-      // Calculate new position
       const speed = 5;
 
       this.self.position.x += Math.sin(this.self.viewAngle) * speed;
@@ -316,8 +313,6 @@ export class GameCanvasDirective {
 
     for(let target of this.targets) {
       this.canvasContext.fillText(target.character, target.position.x, target.position.y + 35);
-
-      // debug
       this.canvasContext.strokeRect(target.position.x - 7, target.position.y + 7, 35, 35);
     }
     this.canvasContext.restore();
