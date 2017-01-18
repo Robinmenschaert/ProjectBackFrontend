@@ -8,6 +8,8 @@ var mongoose = require('mongoose');
 
 var jwt =  require('jsonwebtoken');
 
+ var passwordHash = require('password-hash');
+
 server.listen(3000);
 
 // ========================================================== EXPRESS API ==================================================
@@ -43,7 +45,7 @@ app.post('/register', function(request, response) {
         }else {
           var user = {
             username: request.body.username,
-            password: request.body.password
+            password: passwordHash.generate(request.body.password)
           }
           var data = new UserData(user);
           data.save();
@@ -57,12 +59,17 @@ app.post('/register', function(request, response) {
 app.post('/login', function(request, response) {
   UserData.find({username: request.body.username})
     .then(function(user){
-      if(user[0].password === request.body.password){
-        var date = new Date().getTime();
-        var exspirationDate = date + (24 * 3600);
-        var token = jwt.sign({ player: request.body.username, exp: date}, 'robin');
-        tokens.push(token);
-        response.send({'token': token,"code": 200});
+      if(typeof user !== 'undefined' && user.length > 0){
+        console.log(passwordHash.verify(request.body.password, user[0].password));
+        if(passwordHash.verify(request.body.password, user[0].password)){
+          var date = new Date().getTime();
+          var exspirationDate = date + (24 * 3600);
+          var token = jwt.sign({ player: request.body.username, exp: exspirationDate}, 'robin');
+          tokens.push(token);
+          response.send({'token': token,"code": 200});
+        }else{
+          response.send({"code": 400});
+        }
       }else{
         response.send({"code": 400});
       }
@@ -71,10 +78,10 @@ app.post('/login', function(request, response) {
 
 app.post('/guestLogin', function(request, response) {
   var date = new Date().getTime();
-  var exspirationDate = date + (3600);
+  var exspirationDate = date + (1 * 3600);
   var token = jwt.sign({ player: request.body.username, exp: exspirationDate}, 'robin');
   tokens.push(token);
-  response.send({'token': token,"code": 200});
+  response.send({'token': token,"code": 200, username: request.body.username});
 });
 
 // =========================================================== SOCKET.IO ===================================================
@@ -134,14 +141,12 @@ io.on('connection', function (socket) {
         var date = new Date().getTime();
         if (decoded.exp > date) {
         }else {
-          socket.emit("redirect", JSON.stringify("redirect"));
+          socket.emit("redirect", JSON.stringify("ok"));
         }
-      }else{
-        socket.emit("redirect", JSON.stringify("redirect"));
       }
     }
   }else {
-    socket.emit("redirect", JSON.stringify("redirect"));
+    socket.emit("redirect", JSON.stringify("ok"));
   }
   next();
 });

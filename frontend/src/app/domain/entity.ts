@@ -23,12 +23,14 @@ export class Self {
   viewAngle: number;
   mousePosition: Position;
   score: number;
+  name: string;
 }
 
 export class Enemy {
   position: Position;
   viewAngle: number;
   score: number;
+  name: string;
 }
 
 export class Projectile {

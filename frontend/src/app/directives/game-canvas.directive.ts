@@ -28,8 +28,8 @@ export class GameCanvasDirective {
 
   constructor(private canvasRef: ElementRef, private socketService: SocketService, private router: Router) {
     let canvas = <HTMLCanvasElement> canvasRef.nativeElement;
-    canvas.width = document.documentElement.clientWidth;
-    canvas.height = document.documentElement.clientHeight;
+    canvas.width = document.documentElement.clientWidth - 3;
+    canvas.height = document.documentElement.clientHeight - 3;
 
     this.selfTankImage = new Image();
     this.selfTankImage.src = "/assets/selfTank2.png";
@@ -52,6 +52,7 @@ export class GameCanvasDirective {
     this.self.mousePosition = new Position();
     this.self.viewAngle = 0.0;
     this.self.score = 0;
+    this.self.name = localStorage.getItem("username");;
 
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
@@ -149,6 +150,7 @@ export class GameCanvasDirective {
   }
 
   onRedirect = () => {
+    console.log("trigerd");
     this.router.navigate(['/']);
   }
 
@@ -212,7 +214,8 @@ export class GameCanvasDirective {
     let enemy = <Enemy>{
       position: new Position(this.self.position.x, this.self.position.y),
       viewAngle: this.self.viewAngle,
-      score: this.self.score
+      score: this.self.score,
+      name: this.self.name
     };
     this.socketService.positionUpdate(enemy);
   }
@@ -283,6 +286,7 @@ export class GameCanvasDirective {
   drawSelfScore = () => {
     this.canvasContext.save();
     this.canvasContext.fillText("score = " +  this.self.score, this.self.position.x -(this.tankSize.width/2)  , this.self.position.y + (this.tankSize.height/2) +  20 );
+    this.canvasContext.fillText(this.self.name, this.self.position.x -(this.tankSize.width/2)  , this.self.position.y + (this.tankSize.height/2) +  30 );
     this.canvasContext.restore();
   }
 
@@ -303,6 +307,7 @@ export class GameCanvasDirective {
       let enemy = this.enemies[key];
       this.canvasContext.save();
       this.canvasContext.fillText("score = " +  enemy.score, enemy.position.x -(this.tankSize.width/2)  , enemy.position.y + (this.tankSize.height/2) +  20 );
+      this.canvasContext.fillText(enemy.name, enemy.position.x -(this.tankSize.width/2)  , enemy.position.y + (this.tankSize.height/2) +  30 );
       this.canvasContext.restore();
     }
   }

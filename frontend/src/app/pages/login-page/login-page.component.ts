@@ -35,10 +35,12 @@ export class LoginPageComponent {
         .post('http://localhost:3000/login', body, { headers: headers })
         .subscribe((data: Response) => {
           if (data.json().code === 400) {
+            console.log("badrequest");
             this.responseCode = data.json().code;
           }
           if (data.json().code === 200) {
             localStorage.setItem('token', data.json().token);
+            localStorage.setItem('username', this.loginForm.value.username);
             this.router.navigate(['game']);
           }
         }, error => {
@@ -56,11 +58,16 @@ export class LoginPageComponent {
       .subscribe((data: Response) => {
         if (data.json().code === 200) {
           localStorage.setItem('token', data.json().token);
+          localStorage.setItem('username', data.json().username);
           this.router.navigate(['game']);
         }
       }
       , error => {
           console.log(JSON.stringify(error.json()));
       });
+  }
+
+  goToRegister = (event) => {
+    this.router.navigate(['register']);
   }
 }

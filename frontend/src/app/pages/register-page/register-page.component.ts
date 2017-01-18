@@ -32,12 +32,10 @@ export class RegisterPageComponent implements OnInit {
             headers: headers
           })
           .subscribe((data: Response) => {
-            if (data.json().code === 400 || 401) {
+            if (data.json().code === 400 || data.json().code === 401) {
               this.responseCode = data.json();
-            }
-            if (data.json() === 200) {
-              //gelukt redirect naar login
-              this.router.navigate(['']);
+            }else if (data.json().code === 200) {
+              this.router.navigate(['/']);
             }
           }, error => {
               console.log(JSON.stringify(error.json()));
@@ -45,6 +43,7 @@ export class RegisterPageComponent implements OnInit {
 
 
     }
+
   }
 
   ngOnInit() {

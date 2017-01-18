@@ -1,6 +1,3 @@
-<p>
-  register-page works!
-</p>
 <form [formGroup]="registerForm" (ngSubmit)="doRegister($event)">
     <input formControlName="username" type="text" placeholder="Your username">
     <div *ngIf="((regsterFormSubmitAttempted || registerForm.controls.username.touched || !registerForm.controls.username.pristine) && !registerForm.controls.username.valid)">
